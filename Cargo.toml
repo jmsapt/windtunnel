@@ -1,0 +1,53 @@
+[package]
+name = "Windtunnel"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy_panorbit_camera = "0.12.1"
+# bevy-orbit-controls = "2.0.0"
+
+
+# Bevy Dependency Settings
+[dependencies.bevy]
+version = "0.12"
+default-features = false
+features = [
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_winit",
+  "bevy_asset",
+  "bevy_pbr",
+  "tonemapping_luts"
+]
+
+
+# Development Build Settings
+[target.x86_64-pc-windows-msvc]
+linker = "lld"
+rustflags = [
+  "-Lnative=/home/me/.xwin/crt/lib/x86_64",
+  "-Lnative=/home/me/.xwin/sdk/lib/um/x86_64",
+  "-Lnative=/home/me/.xwin/sdk/lib/ucrt/x86_64",
+]
+
+# Development profiles
+[profile.dev]
+opt-level = 1
+
+
+[profile.dev.package."*"]
+opt-level = "z"
+strip = "symbols"
+codegen-units = 1
+
+# Release Profiles
+# (default 3D scene built down to approx. 11 MB without compresing it)
+[profile.release]
+lto = true
+strip = true
+opt-level = "z"
+codegen-units = 1
+panic = "abort"
