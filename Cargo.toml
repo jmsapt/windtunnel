@@ -6,13 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy_panorbit_camera = "0.12.1"
+# bevy_app_compute = "0.10.3"
+bevy_obj = "0.12.1"
+bevy_panorbit_camera = "0.13.0"
 # bevy-orbit-controls = "2.0.0"
 
 
 # Bevy Dependency Settings
 [dependencies.bevy]
-version = "0.12"
+version = "0.12.1"
 default-features = false
 features = [
   "bevy_core_pipeline",
@@ -20,7 +22,8 @@ features = [
   "bevy_winit",
   "bevy_asset",
   "bevy_pbr",
-  "tonemapping_luts"
+  "tonemapping_luts",
+  "wayland"
 ]
 
 
@@ -42,6 +45,8 @@ opt-level = 1
 opt-level = "z"
 strip = "symbols"
 codegen-units = 1
+
+[env]
 
 # Release Profiles
 # (default 3D scene built down to approx. 11 MB without compresing it)
