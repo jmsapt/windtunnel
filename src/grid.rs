@@ -1,6 +1,14 @@
 use std::fmt::Debug;
 
-use bevy::{asset::Asset, ecs::system::Resource, math::{Vec2, Vec3}, pbr::Material, render::render_resource::AsBindGroup, ui::debug};
+use bevy::{
+    asset::Asset,
+    ecs::{storage, system::Resource},
+    math::{Vec2, Vec3},
+    pbr::Material,
+    reflect::TypePath,
+    render::render_resource::AsBindGroup,
+    ui::debug,
+};
 
 /// Provides extensible grid functionality for solvers
 pub trait Grid: Resource {
@@ -9,19 +17,28 @@ pub trait Grid: Resource {
     fn get_z_bounds() {}
 }
 
+#[derive(Asset, TypePath, AsBindGroup, Clone)]
 pub struct CartesianGrid {
     // Bounds in 3d space
-    x_bounds: (f32, f32),
-    y_bounds: (f32, f32),
-    z_bounds: (f32, f32),
+    #[uniform(0)]
+    x_bounds: Vec2,
+    #[uniform(0)]
+    y_bounds: Vec2,
+    #[uniform(0)]
+    z_bounds: Vec2,
 
     // Number of cell divisions per axis
-    x_divisions: usize,
-    y_divisions: usize,
-    z_divisions: usize,
+    #[uniform(0)]
+    x_divisions: u32,
+    #[uniform(0)]
+    y_divisions: u32,
+    #[uniform(0)]
+    z_divisions: u32,
 
     // Buffers
+    #[storage(1)]
     velocity_field: Vec<Vec3>,
+    #[storage(2)]
     pressure_field: Vec<f32>,
 }
 impl CartesianGrid {
@@ -33,17 +50,26 @@ impl CartesianGrid {
         width: f32,
         height: f32,
         depth: f32,
-        x_divisions: usize,
-        y_divisions: usize,
-        z_divisions: usize,
+        x_divisions: u32,
+        y_divisions: u32,
+        z_divisions: u32,
     ) -> Self {
-        let x_bounds = (-width / 2.0, width / 2.0);
-        let y_bounds = (-height / 2.0, height / 2.0);
-        let z_bounds = (-depth / 2.0, depth / 2.0);
+        let x_bounds = Vec2 {
+            x: -width / 2.0,
+            y: width / 2.0,
+        };
+        let y_bounds = Vec2 {
+            x: -height / 2.0,
+            y: height / 2.0,
+        };
+        let z_bounds = Vec2 {
+            x: -depth / 2.0,
+            y: depth / 2.0,
+        };
 
         let num_cells = x_divisions * y_divisions * z_divisions;
-        let velocity_field = vec![Vec3::ZERO; num_cells];
-        let pressure_field = vec![0.0; num_cells];
+        let velocity_field = vec![Vec3::ZERO; num_cells as usize];
+        let pressure_field = vec![0.0; num_cells as usize];
 
         Self {
             x_bounds,
@@ -57,12 +83,14 @@ impl CartesianGrid {
         }
     }
 
-    fn test_values(width: f32,
+    fn test_values(
+        width: f32,
         height: f32,
         depth: f32,
-        x_divisions: usize,
-        y_divisions: usize,
-        z_divisions: usize,) -> Self {
+        x_divisions: u32,
+        y_divisions: u32,
+        z_divisions: u32,
+    ) -> Self {
         let mut grid = Self::new(width, height, depth, x_divisions, y_divisions, z_divisions);
 
         for y in 0..grid.y_divisions {
@@ -78,8 +106,8 @@ impl CartesianGrid {
         grid
     }
 
-    fn index(&self, x: usize, y: usize, z: usize) -> usize {
-        x * self.y_divisions * self.z_divisions + y * self.z_divisions + z
+    fn index(&self, x: u32, y: u32, z: u32) -> usize {
+        (x * self.y_divisions * self.z_divisions + y * self.z_divisions + z) as usize
     }
 }
 impl Grid for CartesianGrid {

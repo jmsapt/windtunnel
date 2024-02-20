@@ -2,7 +2,11 @@
 use bevy::{
     log::LogPlugin,
     pbr::wireframe::{NoWireframe, Wireframe, WireframePlugin},
-    prelude::*, render::mesh::shape::Plane,
+    prelude::*,
+    render::{
+        mesh::shape::Plane,
+        render_resource::{AsBindGroup, ShaderRef},
+    },
 };
 use bevy_obj::ObjPlugin;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
@@ -19,7 +23,9 @@ const DEFAULT_MESH: &str = "cube.obj";
 fn main() {
     App::new()
         // Default Functionality Plugins
-        .add_plugins((DefaultPlugins, ObjPlugin))
+        .add_plugins(DefaultPlugins)
+        .add_plugins(ObjPlugin)
+        .add_plugins(MaterialPlugin::<ShaderTestMaterial>::default())
         // Camera Plugins
         .add_plugins(PanOrbitCameraPlugin)
         // Other Plugions
@@ -34,10 +40,10 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut test_materials: ResMut<Assets<ShaderTestMaterial>>,
     mut asset_server: ResMut<AssetServer>,
     grid: Res<CartesianGrid>,
 ) {
-    
     // // mesh (default cube)
     // let mesh_handle = asset_server.load(DEFAULT_MESH);
     // commands.spawn(PbrBundle {
@@ -49,13 +55,25 @@ fn setup(
 
     // slicing plane
     dbg!(grid);
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(Plane{size: 1.0, subdivisions: 1})),
-        material: materials.add(Color::rgb_u8(124, 255, 255).into()),
+    // commands.spawn(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(Plane { size: 1.0, subdivisions: 1 })),
+    //     material: test_materials.add(ShaderTestMaterial {
+    //         color: Color::rgba(0.0, 0.0, 1.0, 1.0),
+    //     }),
+    //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
+    //     ..Default::default()
+    // });
+    commands.spawn(MaterialMeshBundle::<ShaderTestMaterial> {
+        mesh: meshes.add(Mesh::from(Plane {
+            size: 1.0,
+            subdivisions: 1,
+        })),
+        material: test_materials.add(ShaderTestMaterial {
+            color: Color::WHITE,
+        }),
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..default()
     });
-
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -76,4 +94,15 @@ fn setup(
         },
         PanOrbitCamera::default(),
     ));
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+struct ShaderTestMaterial {
+    #[uniform(100)]
+    color: Color,
+}
+impl Material for ShaderTestMaterial {
+    fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
+        "shaders/pressure_field.wgsl".into()
+    }
 }

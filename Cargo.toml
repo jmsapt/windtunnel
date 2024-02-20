@@ -23,7 +23,8 @@ features = [
   "bevy_asset",
   "bevy_pbr",
   "tonemapping_luts",
-  "wayland"
+  # "multi-threaded",
+  "wayland",
 ]
 
 
