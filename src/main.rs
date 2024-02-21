@@ -1,5 +1,6 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::{
+    ecs::storage,
     log::LogPlugin,
     pbr::wireframe::{NoWireframe, Wireframe, WireframePlugin},
     prelude::*,
@@ -69,11 +70,13 @@ fn setup(
             subdivisions: 1,
         })),
         material: test_materials.add(ShaderTestMaterial {
-            color: Color::WHITE,
+            color: Color::rgba(0.0, 0.0, 1.0, 1.0),
+            pressure: create_sample_array(10, 10),
         }),
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..default()
     });
+
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -98,11 +101,29 @@ fn setup(
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 struct ShaderTestMaterial {
-    #[uniform(100)]
+    #[uniform(0)]
     color: Color,
+    #[storage(1)]
+    pressure: Vec<f32>,
 }
 impl Material for ShaderTestMaterial {
     fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
         "shaders/pressure_field.wgsl".into()
     }
+
+    fn alpha_mode(&self) -> AlphaMode {
+        AlphaMode::Blend
+    }
+}
+
+fn create_sample_array(rows: usize, cols: usize) -> Vec<f32> {
+    let mut vec = Vec::with_capacity(rows * cols);
+
+    for row in 0..rows {
+        for col in 0..cols {
+            vec.push((row as f32 / rows as f32) + (col as f32 / cols as f32));
+        }
+    }
+
+    vec
 }

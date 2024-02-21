@@ -14,13 +14,16 @@ struct FragmentInput {
 // };
 
 
-// @group(0) @binding(0) var<uniform> gridUniforms: GridUniforms;
-// @group(0) @binding(1) var<storage> velocity: vec3<f32>;
-// @group(0) @binding(2) var<storage> pressure: f32;
+// @group(2) @binding(0) var<uniform> gridUniforms: GridUniforms;
+// @group(2) @binding(1) var<storage> velocity: vec3<f32>;
+@group(1) @binding(0) var<uniform> color: vec4<f32>;
+@group(1) @binding(1) var<storage> pressure: f32;
 
 @fragment
-fn pressure_field(
+fn fragment(
     mesh: VertexOutput,
+    // color: vec4<f32>,
+    // pressure: f32,
 ) -> @location(0) vec4<f32> {
-    return vec4(0.0, 0.0, 1.0, 1.0);
+    return color;
 }
