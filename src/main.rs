@@ -64,12 +64,16 @@ fn setup(
     //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
     //     ..Default::default()
     // });
+
+    // plane
     commands.spawn(MaterialMeshBundle::<ShaderTestMaterial> {
         mesh: meshes.add(Mesh::from(Plane {
             size: 1.0,
             subdivisions: 1,
         })),
         material: test_materials.add(ShaderTestMaterial {
+            num_x: 10,
+            num_y: 10,
             color: Color::rgba(0.0, 0.0, 1.0, 1.0),
             pressure: create_sample_array(10, 10),
         }),
@@ -103,7 +107,12 @@ fn setup(
 struct ShaderTestMaterial {
     #[uniform(0)]
     color: Color,
-    #[storage(1)]
+    #[uniform(1)]
+    num_x: u32,
+    #[uniform(2)]
+    num_y: u32,
+    // num_z: 
+    #[storage(3)]
     pressure: Vec<f32>,
 }
 impl Material for ShaderTestMaterial {

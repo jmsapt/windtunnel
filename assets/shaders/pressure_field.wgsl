@@ -17,7 +17,10 @@ struct FragmentInput {
 // @group(2) @binding(0) var<uniform> gridUniforms: GridUniforms;
 // @group(2) @binding(1) var<storage> velocity: vec3<f32>;
 @group(1) @binding(0) var<uniform> color: vec4<f32>;
-@group(1) @binding(1) var<storage> pressure: f32;
+@group(1) @binding(1) var<uniform> num_x: u32;
+@group(1) @binding(2) var<uniform> num_y: u32;
+
+@group(1) @binding(3) var<storage> pressure: f32;
 
 @fragment
 fn fragment(
